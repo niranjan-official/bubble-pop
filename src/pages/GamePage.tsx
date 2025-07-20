@@ -376,7 +376,7 @@ export function GamePage() {
                 onPop={popLetterInZone}
                 settings={settings}
               />
-              <div className="text-xs ml-8 text-white opacity-80" aria-live="polite">
+              <div className="text-xs ml-8 mt-2 text-white opacity-80" aria-live="polite">
                 Show your fist <span className='text-lg'>(✊)</span> to pop →
               </div>
             </div>
