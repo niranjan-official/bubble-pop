@@ -1,0 +1,1 @@
+export function useFistDetection(videoRef: React.RefObject<HTMLVideoElement>): { detected: boolean; confidence: number }; 
