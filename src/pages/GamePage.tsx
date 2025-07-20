@@ -19,6 +19,7 @@ import { audioManager } from '../utils/audio';
 import { GameState, AccessibilitySettings, FallingLetter as FallingLetterType } from '../types/game';
 import CameraFeed from '../components/detection/CameraFeed';
 import DetectionStatus from '../components/detection/DetectionStatus';
+import VoicePopper from '../components/VoicePopper';
 
 export function GamePage() {
   const { word } = useParams<{ word: string }>();
@@ -457,6 +458,7 @@ export function GamePage() {
       <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 50, border: '2px solid #fff', borderRadius: 12, overflow: 'hidden', background: '#111', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 200 }}>
         <CameraFeed ref={fistVideoRef} width={180} height={135} />
         <DetectionStatus detected={fistDetection.detected} confidence={fistDetection.confidence} />
+        <VoicePopper onPop={popLetterInZone} />
       </div>
     </div>
   );

@@ -47,7 +47,6 @@ export function StartPage() {
 
   const startGame = () => {
     const word = getRandomWord();
-    // If on mobile, pass fullscreen flag
     const isMobile = window.innerWidth < 640;
     navigate(`/game/${word}`, { state: isMobile ? { fullscreen: true } : undefined });
   };
