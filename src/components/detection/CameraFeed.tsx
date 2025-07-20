@@ -13,11 +13,12 @@ const CameraFeed = React.forwardRef<HTMLVideoElement, CameraFeedProps>((props, r
     async function setupCamera() {
       if (ref && 'current' in ref && ref.current) {
         try {
+          // Always request at least 320x240 for detection quality
           const constraints = {
             video: {
               facingMode: 'user',
-              width: props.width || 400,
-              height: props.height || 300,
+              width: { ideal: Math.max(props.width || 320, 320) },
+              height: { ideal: Math.max(props.height || 240, 240) },
             }
           };
           const stream = await navigator.mediaDevices.getUserMedia(constraints);

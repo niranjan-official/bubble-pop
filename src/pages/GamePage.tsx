@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, RotateCcw, Lightbulb, Volume2, Mic, Settings } from 'lucide-react';
+import { Home, RotateCcw, Lightbulb, Volume2, Mic, Settings, CheckCircle, XCircle, Hand } from 'lucide-react';
 import { FallingLetter } from '../components/FallingLetter';
 import { DropZone } from '../components/DropZone';
 import { WordDisplay } from '../components/WordDisplay';
@@ -19,7 +19,6 @@ import { audioManager } from '../utils/audio';
 import { GameState, AccessibilitySettings, FallingLetter as FallingLetterType } from '../types/game';
 import CameraFeed from '../components/detection/CameraFeed';
 import DetectionStatus from '../components/detection/DetectionStatus';
-import VoicePopper from '../components/VoicePopper';
 
 export function GamePage() {
   const { word } = useParams<{ word: string }>();
@@ -251,16 +250,6 @@ export function GamePage() {
     }
   }
 
-  // Restore handleGestureInput
-  function handleGestureInput(gesture: string) {
-    if (gesture === 'point') {
-      const letterInZone = gameState.fallingLetters.find(l => l.inDropZone);
-      if (letterInZone) {
-        popLetter(letterInZone);
-      }
-    }
-  }
-
   return (
     <div 
       className={`min-h-screen game-container relative overflow-hidden ${settings.largeText ? 'text-lg' : ''}`}
@@ -286,7 +275,7 @@ export function GamePage() {
           <div className="flex items-center space-x-2 sm:space-x-2">
             <button
               onClick={goHome}
-              className="large-target bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
+              className="large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
               aria-label="Go to home page"
               title="Home"
             >
@@ -295,7 +284,7 @@ export function GamePage() {
             
             <button
               onClick={resetGame}
-              className="large-target bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
+              className="large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
               aria-label="Reset current word"
               title="Reset"
             >
@@ -304,7 +293,7 @@ export function GamePage() {
             
             <button
               onClick={giveHint}
-              className="large-target bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
+              className="large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] p-2 sm:p-3 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
               aria-label="Get hint for next letter"
               title="Hint"
             >
@@ -336,7 +325,7 @@ export function GamePage() {
           <div className="sm:hidden">
             <button
               onClick={() => setShowAccessibility(!showAccessibility)}
-              className="large-target bg-white bg-opacity-20 backdrop-blur-sm text-white p-2 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
+              className="large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] p-2 rounded-full hover:bg-opacity-30 transition-colors focus-visible:focus flex items-center justify-center"
               aria-label="Open accessibility controls"
               title="Settings"
             >
@@ -351,7 +340,7 @@ export function GamePage() {
       <div 
         ref={gameAreaRef}
         id="game-area"
-        className={`relative w-full min-h-[100svh] h-screen pt-24 sm:pt-28 pb-4 sm:pb-8 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-500`} // modern dark blue-indigo gradient, full mobile height
+        className={`relative w-full min-h-[100svh] h-screen pt-24 sm:pt-28 pb-4 sm:pb-8 bg-gradient-to-br from-[#a536ff] via-[#622cc5] to-[#7c3aed]`}
         role="main"
         aria-label="Game playing area"
       >
@@ -420,7 +409,7 @@ export function GamePage() {
                 <button
                   onClick={nextWord}
                   className={`
-                    large-target bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full
+                    large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] font-bold rounded-full
                     transition-colors focus-visible:focus
                     ${settings.largeText ? 'px-8 py-4 text-lg' : 'px-6 py-3'}
                   `}
@@ -432,7 +421,7 @@ export function GamePage() {
                 <button
                   onClick={goHome}
                   className={`
-                    large-target bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-full
+                    large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] font-bold rounded-full
                     transition-colors focus-visible:focus
                     ${settings.largeText ? 'px-8 py-4 text-lg' : 'px-6 py-3'}
                   `}
@@ -454,11 +443,20 @@ export function GamePage() {
         }
       </div>
 
-      {/* Visible camera feed for fist detection (for development) */}
-      <div style={{ position: 'fixed', bottom: 16, right: 16, zIndex: 50, border: '2px solid #fff', borderRadius: 12, overflow: 'hidden', background: '#111', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 200 }}>
-        <CameraFeed ref={fistVideoRef} width={180} height={135} />
-        <DetectionStatus detected={fistDetection.detected} confidence={fistDetection.confidence} />
-        <VoicePopper onPop={popLetterInZone} />
+      {/* Small camera feed and progress bar gesture status in bottom right */}
+      <div style={{ position: 'fixed', bottom: 10, right: 10, zIndex: 50, border: '2px solid #b39ddb', borderRadius: 10, overflow: 'hidden', background: '#ede7f6', boxShadow: '0 2px 8px rgba(124,58,237,0.18)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 80, padding: 0 }}>
+        <CameraFeed ref={fistVideoRef} width={100} height={70} style={{ borderRadius: 8, background: '#b39ddb' }} />
+        <div className='w-full px-2 my-2'>
+          {/* Progress bar */}
+          <div className='' style={{ flex: 1, height: 8, background: '#d1c4e9', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{
+              width: `${Math.round(Math.max(0, Math.min(1, fistDetection.confidence)) * 100)}%`,
+              height: '100%',
+              background: fistDetection.detected ? '#22c55e' : '#bdbdbd',
+              transition: 'width 0.2s',
+            }} />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -59,7 +59,7 @@ export function StartPage() {
   };
 
   return (
-    <div className={`min-h-screen game-container flex items-center justify-center p-2 sm:p-4 ${settings.largeText ? 'text-lg' : ''}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-[#a536ff] via-[#622cc5] to-[#7c3aed] flex items-center justify-center p-2 sm:p-4 ${settings.largeText ? 'text-lg' : ''}`}>
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
@@ -105,6 +105,9 @@ export function StartPage() {
                 title="Multiple Controls"
                 description="Use mouse, keyboard, voice, or gestures"
                 largeText={settings.largeText}
+                cardColor="#ede7f6"
+                borderColor="#b39ddb"
+                textColor="#2d133b"
               />
               <div className="hidden sm:block">
                 <FeatureCard
@@ -112,6 +115,9 @@ export function StartPage() {
                   title="Accessible Design"
                   description="High contrast, screen reader support, OpenDyslexic font"
                   largeText={settings.largeText}
+                  cardColor="#ede7f6"
+                  borderColor="#b39ddb"
+                  textColor="#2d133b"
                 />
               </div>
               <div className="hidden sm:block">
@@ -120,6 +126,9 @@ export function StartPage() {
                   title="Audio Feedback"
                   description="Voice instructions and sound cues"
                   largeText={settings.largeText}
+                  cardColor="#ede7f6"
+                  borderColor="#b39ddb"
+                  textColor="#2d133b"
                 />
               </div>
             </div>
@@ -130,8 +139,8 @@ export function StartPage() {
             onClick={startGame}
             onKeyDown={handleKeyDown}
             className={`
-              large-target bg-yellow-400 hover:bg-yellow-300 text-yellow-900 
-              font-bold rounded-full shadow-lg transition-all duration-200
+              large-target bg-[#ffe066] hover:bg-[#ffd600] text-[#2d133b] 
+              font-bold rounded-full transition-all duration-200
               focus-visible:focus flex items-center justify-center mx-auto
               w-full max-w-xs sm:max-w-md
               ${settings.largeText ? 'px-10 py-5 text-xl sm:px-12 sm:py-6 sm:text-2xl' : 'px-8 py-4 text-lg sm:px-10 sm:py-4 sm:text-xl'}
@@ -147,7 +156,6 @@ export function StartPage() {
             <Play size={settings.largeText ? 28 : 22} className="mr-2 sm:mr-3" />
             Start Game
           </motion.button>
-
           {/* Minimal instructions on mobile */}
           <motion.div
             className="mt-2 sm:mt-8 text-white text-opacity-70"
@@ -168,9 +176,12 @@ interface FeatureCardProps {
   title: string;
   description: string;
   largeText: boolean;
+  cardColor: string;
+  borderColor: string;
+  textColor: string;
 }
 
-function FeatureCard({ icon, title, description, largeText }: FeatureCardProps) {
+function FeatureCard({ icon, title, description, largeText, cardColor, borderColor, textColor }: FeatureCardProps) {
   return (
     <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 text-white">
       <div className="text-yellow-400 mb-4 flex justify-center">

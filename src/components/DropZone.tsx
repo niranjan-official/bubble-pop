@@ -16,11 +16,11 @@ export function DropZone({ hasLetterInZone, onPop, settings }: DropZoneProps) {
     <div className="flex flex-col-reverse items-center space-y-4 px-4 gap-5">
       <motion.div
         className={`
-          relative w-full h-72 rounded-2xl border-4
+          relative w-full h-72 rounded-2xl border-4 border-dashed
           flex items-center justify-center transition-all duration-300
           ${hasLetterInZone 
-            ? 'border-yellow-400 bg-yellow-100 shadow-lg' 
-            : 'border-white border-opacity-60 bg-white bg-opacity-20  border-dashed'
+            ? 'border-[#b39ddb] bg-[#ede7f6] shadow-lg' 
+            : 'border-[#b39ddb] bg-[#f3e8ff]'
           }
         `}
         animate={settings.reducedMotion ? {} : {
@@ -35,13 +35,13 @@ export function DropZone({ hasLetterInZone, onPop, settings }: DropZoneProps) {
           size={64} 
           className={`
             transition-colors duration-300
-            ${hasLetterInZone ? 'text-yellow-600' : 'text-white text-opacity-60'}
+            ${hasLetterInZone ? 'text-[#7c3aed]' : 'text-[#b39ddb]'}
           `} 
         />
         
         {hasLetterInZone && (
           <motion.div
-            className="absolute inset-0 rounded-2xl border-4 border-yellow-400"
+            className="absolute inset-0 rounded-2xl border-4 border-[#b39ddb]"
             animate={settings.reducedMotion ? {} : {
               opacity: [0.5, 1, 0.5],
             }}

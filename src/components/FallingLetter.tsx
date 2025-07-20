@@ -41,18 +41,18 @@ export function FallingLetter({ letter, onClick, settings }: FallingLetterProps)
           w-16 h-16 flex items-center justify-center rounded-full font-bold
           transition-all duration-200 focus-visible:focus relative
           ${letter.isCorrect 
-            ? 'bg-gradient-to-br from-green-300 to-green-500 text-green-900' 
-            : 'bg-gradient-to-br from-blue-300 to-blue-500 text-blue-900'
+            ? 'bg-[#ffe066] text-[#2d133b]' 
+            : 'bg-[#b39ddb] text-[#1e044d]'
           }
           ${letter.inDropZone 
-            ? 'shadow-2xl transform scale-110' 
-            : 'shadow-lg'
+            ? 'shadow-lg transform scale-110' 
+            : 'shadow-md'
           }
         `}
         style={{
           boxShadow: letter.inDropZone 
-            ? '0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(251, 191, 36, 0.5)' 
-            : '0 8px 20px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3)'
+            ? '0 10px 25px rgba(124,58,237,0.18), 0 0 0 4px #ffe066' 
+            : '0 8px 20px rgba(124,58,237,0.12), inset 0 2px 4px #b39ddb'
         }}
       >
         {/* Bubble highlight effect */}
