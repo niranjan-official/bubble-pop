@@ -18,7 +18,6 @@ export function useFistDetection(videoRef: React.RefObject<HTMLVideoElement>) {
     async function setup() {
       try {
         modelRef.current = await loadFistModel();
-        console.log('[FistDetection] Model loaded:', modelRef.current);
       } catch (e) {
         console.error('[FistDetection] Error loading model:', e);
       }
@@ -26,12 +25,11 @@ export function useFistDetection(videoRef: React.RefObject<HTMLVideoElement>) {
         detectorRef.current = await handPoseDetection.createDetector(
           handPoseDetection.SupportedModels.MediaPipeHands,
           {
-            runtime: 'tfjs', // use tfjs backend instead of mediapipe
+            runtime: 'tfjs',
             modelType: 'lite',
             maxHands: 1,
           }
         );
-        console.log('[FistDetection] MediaPipe Hands detector loaded:', detectorRef.current);
       } catch (e) {
         console.error('[FistDetection] Error loading MediaPipe Hands:', e);
       }
@@ -54,7 +52,6 @@ export function useFistDetection(videoRef: React.RefObject<HTMLVideoElement>) {
       }
       const hands = await detectorRef.current.estimateHands(video, { flipHorizontal: true });
       if (hands.length > 0 && hands[0].keypoints) {
-        console.log('[FistDetection] Hand detected, landmarks:', hands[0].keypoints);
       }
       let detected = false;
       let confidence = 0;
@@ -70,7 +67,6 @@ export function useFistDetection(videoRef: React.RefObject<HTMLVideoElement>) {
         const smoothed = detectionHistory.current.reduce((a, b) => a + b, 0) / detectionHistory.current.length;
         confidence = smoothed;
         detected = smoothed > FIST_THRESHOLD;
-        // console.log('[FistDetection] Model prediction:', prediction, 'Smoothed:', smoothed, 'Detected:', detected);
       } else {
         detectionHistory.current = [];
       }

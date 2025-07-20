@@ -47,54 +47,46 @@ export function GamePage() {
   const [dropZone, setDropZone] = useState({
     x: 0,
     y: 0,
-    width: 0, // Will be set to screen width
-    height: 300 // Keep height at 300
+    width: 0,
+    height: 300 
   });
 
   const fistVideoRef = useRef<HTMLVideoElement>(null);
   const fistDetection = useFistDetection(fistVideoRef);
   const [fistPopped, setFistPopped] = useState(false);
 
-  // Refs to always have latest state for voice command pop
   const gameStateRef = useRef(gameState);
   const dropZoneRef = useRef(dropZone);
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
   useEffect(() => { dropZoneRef.current = dropZone; }, [dropZone]);
 
-  // Move popLetterInZone above useVoiceCommands
   const popLetterInZone = () => {
     const { fallingLetters, targetLetters, currentLetterIndex } = gameStateRef.current;
     const dz = dropZoneRef.current;
     const currentLetter = targetLetters[currentLetterIndex];
     const lettersInZone = fallingLetters.filter(l => checkLetterInDropZone(l, dz));
-    console.log('[VoiceCommands] popLetterInZone called.');
-    console.log('Current letter needed:', currentLetter);
-    console.log('Letters in drop zone:', lettersInZone.map(l => l.letter));
     const correctLetterInZone = lettersInZone.find(l => l.letter.toLowerCase() === currentLetter.toLowerCase());
     if (correctLetterInZone) {
       popLetter(correctLetterInZone);
     } else {
-      console.log('[VoiceCommands] No correct letter in drop zone to pop.');
       audioManager.speakInstruction(`Incorrect letter`);
     }
   };
 
-  // Voice commands hook
   const { isListening, isSupported: voiceSupported } = useVoiceCommands({
     onLetterRecognized: handleVoiceInput,
     isEnabled: settings.voiceEnabled,
     onBubbleCommand: popLetterInZone
   });
 
-  // Update drop zone position when component mounts
   useEffect(() => {
     const updateDropZone = () => {
       if (gameAreaRef.current) {
         const rect = gameAreaRef.current.getBoundingClientRect();
         setDropZone({
-          x: 0, // Start from left edge
-          y: rect.height / 2 - 150, // Center vertically
-          width: rect.width, // Full screen width
+          x: 0, 
+          y: rect.height / 2 - 150, 
+          width: rect.width, 
           height: 300
         });
       }
@@ -105,7 +97,6 @@ export function GamePage() {
     return () => window.removeEventListener('resize', updateDropZone);
   }, []);
 
-  // Apply accessibility settings
   useEffect(() => {
     document.documentElement.classList.toggle('high-contrast', settings.highContrast);
     document.documentElement.classList.toggle('reduced-motion', settings.reducedMotion);
@@ -113,7 +104,6 @@ export function GamePage() {
     audioManager.setEnabled(settings.voiceEnabled);
   }, [settings]);
 
-  // Game loop
   useEffect(() => {
     if (gameState.isComplete) return;
 
@@ -124,15 +114,12 @@ export function GamePage() {
         const rect = gameAreaRef.current.getBoundingClientRect();
         let newLetters = [...prev.fallingLetters];
 
-        // Add new letter occasionally (reduced frequency and only one at a time)
         if (Math.random() < 0.015 && newLetters.length < 1) {
           newLetters.push(createFallingLetter(rect.width, prev.currentWord, newLetters, prev.currentLetterIndex));
         }
 
-        // Update existing letters
         newLetters = updateFallingLetters(newLetters, rect.height, dropZone);
 
-        // Update drop zone status
         newLetters = newLetters.map(letter => ({
           ...letter,
           inDropZone: checkLetterInDropZone(letter, {
@@ -148,12 +135,11 @@ export function GamePage() {
           fallingLetters: newLetters
         };
       });
-    }, 16); // 60fps
+    }, 16); 
 
     return () => clearInterval(interval);
   }, [gameState.isComplete, dropZone]);
 
-  // Update game state when word parameter changes
   useEffect(() => {
     if (word) {
       const newWord = word.toLowerCase();
@@ -166,14 +152,12 @@ export function GamePage() {
         fallingLetters: []
       });
       
-      // Announce the new word
       setTimeout(() => {
         audioManager.speakInstruction(`New word: ${word}. Catch the letters to spell it out!`);
       }, 500);
     }
   }, [word]);
 
-  // On mobile, scroll to bottom on mount
   useEffect(() => {
     if (window.innerWidth < 640) {
       setTimeout(() => {
@@ -182,7 +166,6 @@ export function GamePage() {
     }
   }, []);
 
-  // Move popLetter above the fist pop effect
   const popLetter = useCallback((letter: FallingLetterType) => {
     const state = gameStateRef.current;
     const currentLetter = state.targetLetters[state.currentLetterIndex];
@@ -198,9 +181,7 @@ export function GamePage() {
         audioManager.speakInstruction(`Congratulations! You spelled ${state.currentWord}!`);
       }
       setGameState(prev => {
-        // Remove the popped letter
         const updatedFalling = prev.fallingLetters.filter(l => l.id !== letter.id);
-        // If not complete, immediately add the next needed letter
         let newFalling = updatedFalling;
         if (!isWordComplete) {
           const rect = gameAreaRef.current?.getBoundingClientRect();
@@ -229,7 +210,6 @@ export function GamePage() {
     }
   }, []);
 
-  // Fist pop effect
   useEffect(() => {
     if (fistDetection.detected && !fistPopped) {
       const letterInZone = gameState.fallingLetters.find(l => l.inDropZone);
@@ -271,7 +251,6 @@ export function GamePage() {
 
   const hasLetterInZone = gameState.fallingLetters.some(l => l.inDropZone);
 
-  // Restore handleVoiceInput
   function handleVoiceInput(letter: string) {
     const lettersInZone = gameState.fallingLetters.filter(l => l.inDropZone);
     const targetLetter = lettersInZone.find(l => l.letter === letter);
@@ -297,11 +276,9 @@ export function GamePage() {
         />
       </div>
 
-      {/* Top UI */}
       <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/20 to-transparent pb-2">
         <div className="px-2 sm:px-4 pt-2 sm:pt-4">
         <div className="flex justify-between items-center gap-3 sm:gap-0">
-          {/* Left side - Game controls */}
           <div className="flex items-center space-x-2 sm:space-x-2">
             <button
               onClick={goHome}
@@ -331,9 +308,7 @@ export function GamePage() {
             </button>
           </div>
 
-          {/* Center - Score (mobile) / Right side - Status indicators (desktop) */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Voice indicator - hidden on very small screens */}
             {settings.voiceEnabled && voiceSupported && (
               <div className={`hidden sm:flex items-center space-x-2 px-2 sm:px-3 py-1 sm:py-2 rounded-full text-xs sm:text-sm ${
                 isListening ? 'bg-green-500 text-white' : 'bg-white bg-opacity-20 text-white'
@@ -343,15 +318,12 @@ export function GamePage() {
               </div>
             )}
 
-            {/* Score */}
             <div className="bg-white bg-opacity-20 backdrop-blur-sm text-white px-3 sm:px-4 py-1 sm:py-2 rounded-full">
               <span className={`font-bold text-sm sm:text-base ${settings.largeText ? 'text-base sm:text-lg' : ''}`}>
                 Score: {gameState.score}
               </span>
             </div>
           </div>
-
-          {/* Right side - Settings button (mobile only) */}
           <div className="sm:hidden">
             <button
               onClick={() => setShowAccessibility(!showAccessibility)}
@@ -366,7 +338,6 @@ export function GamePage() {
         </div>
       </div>
 
-      {/* Main game area */}
       <div 
         ref={gameAreaRef}
         id="game-area"
@@ -382,7 +353,7 @@ export function GamePage() {
           />
 
           <div className="flex-1 relative">
-            {/* Falling letters */}
+
             <AnimatePresence>
               {gameState.fallingLetters.map(letter => (
                 <FallingLetter
@@ -394,7 +365,6 @@ export function GamePage() {
               ))}
             </AnimatePresence>
 
-            {/* Drop zone spanning full width */}
             <div 
               className="absolute left-0 right-0 transform -translate-y-1/2 z-10"
               style={{
@@ -406,12 +376,14 @@ export function GamePage() {
                 onPop={popLetterInZone}
                 settings={settings}
               />
+              <div className="text-xs text-center mt-2 text-[#2d133b] opacity-80" aria-live="polite">
+                Tip: Show your fist to pop the letter!
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Completion modal */}
       <AnimatePresence>
         {gameState.isComplete && (
           <motion.div
@@ -465,7 +437,6 @@ export function GamePage() {
         )}
       </AnimatePresence>
 
-      {/* Instructions overlay for screen readers */}
       <div className="sr-only" aria-live="polite" role="status">
         {gameState.isComplete 
           ? `Word completed! You spelled ${gameState.currentWord} with a score of ${gameState.score} points.`
@@ -473,11 +444,9 @@ export function GamePage() {
         }
       </div>
 
-      {/* Small camera feed and progress bar gesture status in bottom right */}
       <div style={{ position: 'fixed', bottom: 10, right: 10, zIndex: 50, border: '2px solid #b39ddb', borderRadius: 10, overflow: 'hidden', background: '#ede7f6', boxShadow: '0 2px 8px rgba(124,58,237,0.18)', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 80, padding: 0 }}>
         <CameraFeed ref={fistVideoRef} width={100} height={70} style={{ borderRadius: 8, background: '#b39ddb' }} />
         <div className='w-full px-2 my-2'>
-          {/* Progress bar */}
           <div className='' style={{ flex: 1, height: 8, background: '#d1c4e9', borderRadius: 4, overflow: 'hidden' }}>
             <div style={{
               width: `${Math.round(Math.max(0, Math.min(1, fistDetection.confidence)) * 100)}%`,

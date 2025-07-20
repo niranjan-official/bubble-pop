@@ -19,13 +19,11 @@ export function StartPage() {
   });
 
   useEffect(() => {
-    // Load saved settings
     const savedSettings = localStorage.getItem('accessibility-settings');
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
     }
 
-    // Announce the page
     setTimeout(() => {
       audioManager.speakInstruction(
         'Welcome to the accessible letter game. Click the start button to begin, or open accessibility controls to customize your experience.'
@@ -34,14 +32,11 @@ export function StartPage() {
   }, []);
 
   useEffect(() => {
-    // Apply settings to document
     document.documentElement.classList.toggle('high-contrast', settings.highContrast);
     document.documentElement.classList.toggle('reduced-motion', settings.reducedMotion);
     
-    // Save settings
     localStorage.setItem('accessibility-settings', JSON.stringify(settings));
     
-    // Update audio manager
     audioManager.setEnabled(settings.voiceEnabled);
   }, [settings]);
 
@@ -92,7 +87,6 @@ export function StartPage() {
             Catch falling letters to spell words using clicks, voice commands, or gestures!
           </motion.p>
 
-          {/* Feature cards: only show one on mobile, all on desktop */}
           <motion.div
             className="mb-4 sm:mb-8 w-full"
             initial={{ opacity: 0, y: 20 }}
@@ -133,8 +127,6 @@ export function StartPage() {
               </div>
             </div>
           </motion.div>
-
-          {/* Start button - always visible and prominent */}
           <motion.button
             onClick={startGame}
             onKeyDown={handleKeyDown}
@@ -156,7 +148,6 @@ export function StartPage() {
             <Play size={settings.largeText ? 28 : 22} className="mr-2 sm:mr-3" />
             Start Game
           </motion.button>
-          {/* Minimal instructions on mobile */}
           <motion.div
             className="mt-2 sm:mt-8 text-white text-opacity-70"
             initial={{ opacity: 0 }}

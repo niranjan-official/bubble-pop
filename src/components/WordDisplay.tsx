@@ -17,7 +17,6 @@ export function WordDisplay({ word, currentIndex, settings }: WordDisplayProps) 
         Find the letters to spell:
       </h2>
       
-      {/* Show the complete word clearly */}
       <div className="mb-4 sm:mb-6">
         <div className={`font-bold text-yellow-300 mb-2 ${settings.largeText ? 'text-xl sm:text-2xl' : 'text-lg sm:text-xl'}`}>
           Target Word: {word.toUpperCase()}

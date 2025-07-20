@@ -55,7 +55,6 @@ export function FallingLetter({ letter, onClick, settings }: FallingLetterProps)
             : '0 8px 20px rgba(124,58,237,0.12), inset 0 2px 4px #b39ddb'
         }}
       >
-        {/* Bubble highlight effect */}
         <div 
           className="absolute top-1 left-1 w-4 h-4 rounded-full opacity-30"
           style={{
@@ -63,12 +62,10 @@ export function FallingLetter({ letter, onClick, settings }: FallingLetterProps)
           }}
         />
         
-        {/* Letter */}
         <span className="relative z-10 text-2xl font-bold">
           {letter.letter}
         </span>
         
-        {/* Bubble shine effect */}
         <div 
           className="absolute top-2 left-2 w-2 h-2 rounded-full opacity-50"
           style={{
