@@ -78,8 +78,8 @@ export function StartPage() {
           transition={{ duration: 0.6 }}
           className="w-full"
         >
-          <h1 className={`font-bold text-white mb-2 sm:mb-6 letter-shadow ${settings.largeText ? 'text-4xl sm:text-6xl' : 'text-2xl sm:text-5xl'}`}>
-            🎯 Letter Pop Game
+          <h1 className={`flex flex-col gap-2 font-bold text-white mb-6 letter-shadow ${settings.largeText ? 'text-4xl sm:text-6xl' : 'text-4xl sm:text-5xl'}`}>
+            <span>🎯</span><span>Bubble Pop</span>
           </h1>
           
           <motion.p 
