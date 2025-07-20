@@ -70,7 +70,7 @@ export function useFistDetection(videoRef: React.RefObject<HTMLVideoElement>) {
         const smoothed = detectionHistory.current.reduce((a, b) => a + b, 0) / detectionHistory.current.length;
         confidence = smoothed;
         detected = smoothed > FIST_THRESHOLD;
-        console.log('[FistDetection] Model prediction:', prediction, 'Smoothed:', smoothed, 'Detected:', detected);
+        // console.log('[FistDetection] Model prediction:', prediction, 'Smoothed:', smoothed, 'Detected:', detected);
       } else {
         detectionHistory.current = [];
       }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, RotateCcw, Lightbulb, Volume2, Mic, Settings, CheckCircle, XCircle, Hand } from 'lucide-react';
+import { Home, RotateCcw, Lightbulb, Mic, Settings } from 'lucide-react';
 import { FallingLetter } from '../components/FallingLetter';
 import { DropZone } from '../components/DropZone';
 import { WordDisplay } from '../components/WordDisplay';
@@ -18,13 +18,11 @@ import {
 import { audioManager } from '../utils/audio';
 import { GameState, AccessibilitySettings, FallingLetter as FallingLetterType } from '../types/game';
 import CameraFeed from '../components/detection/CameraFeed';
-import DetectionStatus from '../components/detection/DetectionStatus';
 
 export function GamePage() {
   const { word } = useParams<{ word: string }>();
   const navigate = useNavigate();
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
   const [showAccessibility, setShowAccessibility] = useState(false);
   
   const [settings, setSettings] = useState<AccessibilitySettings>(() => {
@@ -57,10 +55,35 @@ export function GamePage() {
   const fistDetection = useFistDetection(fistVideoRef);
   const [fistPopped, setFistPopped] = useState(false);
 
+  // Refs to always have latest state for voice command pop
+  const gameStateRef = useRef(gameState);
+  const dropZoneRef = useRef(dropZone);
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+  useEffect(() => { dropZoneRef.current = dropZone; }, [dropZone]);
+
+  // Move popLetterInZone above useVoiceCommands
+  const popLetterInZone = () => {
+    const { fallingLetters, targetLetters, currentLetterIndex } = gameStateRef.current;
+    const dz = dropZoneRef.current;
+    const currentLetter = targetLetters[currentLetterIndex];
+    const lettersInZone = fallingLetters.filter(l => checkLetterInDropZone(l, dz));
+    console.log('[VoiceCommands] popLetterInZone called.');
+    console.log('Current letter needed:', currentLetter);
+    console.log('Letters in drop zone:', lettersInZone.map(l => l.letter));
+    const correctLetterInZone = lettersInZone.find(l => l.letter.toLowerCase() === currentLetter.toLowerCase());
+    if (correctLetterInZone) {
+      popLetter(correctLetterInZone);
+    } else {
+      console.log('[VoiceCommands] No correct letter in drop zone to pop.');
+      audioManager.speakInstruction(`Incorrect letter`);
+    }
+  };
+
   // Voice commands hook
   const { isListening, isSupported: voiceSupported } = useVoiceCommands({
     onLetterRecognized: handleVoiceInput,
-    isEnabled: settings.voiceEnabled
+    isEnabled: settings.voiceEnabled,
+    onBubbleCommand: popLetterInZone
   });
 
   // Update drop zone position when component mounts
@@ -161,34 +184,50 @@ export function GamePage() {
 
   // Move popLetter above the fist pop effect
   const popLetter = useCallback((letter: FallingLetterType) => {
-    const currentLetter = gameState.targetLetters[gameState.currentLetterIndex];
-    const correct = isCorrectLetter(letter.letter, gameState.currentWord, gameState.currentLetterIndex);
+    const state = gameStateRef.current;
+    const currentLetter = state.targetLetters[state.currentLetterIndex];
+    const correct = isCorrectLetter(letter.letter, state.currentWord, state.currentLetterIndex);
 
     if (correct) {
       audioManager.playSound('correct');
       audioManager.speakLetter(letter.letter);
-      const newIndex = gameState.currentLetterIndex + 1;
-      const isWordComplete = newIndex >= gameState.targetLetters.length;
+      const newIndex = state.currentLetterIndex + 1;
+      const isWordComplete = newIndex >= state.targetLetters.length;
       if (isWordComplete) {
         audioManager.playSound('complete');
-        audioManager.speakInstruction(`Congratulations! You spelled ${gameState.currentWord}!`);
+        audioManager.speakInstruction(`Congratulations! You spelled ${state.currentWord}!`);
       }
-      setGameState(prev => ({
-        ...prev,
-        currentLetterIndex: newIndex,
-        score: prev.score + 10,
-        isComplete: isWordComplete,
-        fallingLetters: prev.fallingLetters.filter(l => l.id !== letter.id)
-      }));
+      setGameState(prev => {
+        // Remove the popped letter
+        const updatedFalling = prev.fallingLetters.filter(l => l.id !== letter.id);
+        // If not complete, immediately add the next needed letter
+        let newFalling = updatedFalling;
+        if (!isWordComplete) {
+          const rect = gameAreaRef.current?.getBoundingClientRect();
+          if (rect) {
+            newFalling = [
+              ...updatedFalling,
+              createFallingLetter(rect.width, prev.currentWord, updatedFalling, newIndex)
+            ];
+          }
+        }
+        return {
+          ...prev,
+          currentLetterIndex: newIndex,
+          score: prev.score + 10,
+          isComplete: isWordComplete,
+          fallingLetters: newFalling
+        };
+      });
     } else {
       audioManager.playSound('incorrect');
-      audioManager.speakInstruction(`Wrong letter. Looking for ${currentLetter?.toUpperCase()}`);
+      audioManager.speakInstruction('Incorrect letter');
       setGameState(prev => ({
         ...prev,
         fallingLetters: prev.fallingLetters.filter(l => l.id !== letter.id)
       }));
     }
-  }, [gameState.currentLetterIndex, gameState.targetLetters, gameState.currentWord]);
+  }, []);
 
   // Fist pop effect
   useEffect(() => {
@@ -203,15 +242,6 @@ export function GamePage() {
       setFistPopped(false);
     }
   }, [fistDetection.detected, gameState.fallingLetters, popLetter, fistPopped]);
-
-  const popLetterInZone = () => {
-    const letterInZone = gameState.fallingLetters.find(l => 
-      checkLetterInDropZone(l, dropZone)
-    );
-    if (letterInZone) {
-      popLetter(letterInZone);
-    }
-  };
 
   const giveHint = () => {
     const nextLetter = gameState.targetLetters[gameState.currentLetterIndex];

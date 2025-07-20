@@ -1,11 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 
+// Type definitions for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+  var SpeechRecognition: {
+    prototype: SpeechRecognition;
+    new (): SpeechRecognition;
+  };
+}
+// If SpeechRecognition is not defined, define a minimal type for TS
+type SpeechRecognition = any;
+
 interface UseVoiceCommandsProps {
   onLetterRecognized: (letter: string) => void;
   isEnabled: boolean;
+  onBubbleCommand?: () => void; // Add this line
 }
 
-export function useVoiceCommands({ onLetterRecognized, isEnabled }: UseVoiceCommandsProps) {
+export function useVoiceCommands({ onLetterRecognized, isEnabled, onBubbleCommand }: UseVoiceCommandsProps) {
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -44,22 +59,24 @@ export function useVoiceCommands({ onLetterRecognized, isEnabled }: UseVoiceComm
       }
     };
 
-    recognition.onresult = (event) => {
+    recognition.onresult = (event: any) => {
       const results = Array.from(event.results);
       const transcript = results
-        .map(result => result[0].transcript)
+        .map((result: any) => result[0].transcript)
         .join('')
         .toLowerCase()
         .trim();
 
-      // Extract single letters from speech
-      const letterMatch = transcript.match(/\b([a-z])\b/);
-      if (letterMatch) {
-        onLetterRecognized(letterMatch[1].toUpperCase());
+      console.log('[VoiceCommands] Transcript received:', transcript);
+
+      // Check for the word 'bubble' and trigger the callback if present
+      if (onBubbleCommand && /\b(bubble|pop)\b/.test(transcript)) {
+        console.log('[VoiceCommands] "bubble" command detected!');
+        onBubbleCommand();
       }
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = (event: any) => {
       console.log('Speech recognition error:', event.error);
       if (event.error === 'not-allowed') {
         setIsSupported(false);
@@ -73,7 +90,7 @@ export function useVoiceCommands({ onLetterRecognized, isEnabled }: UseVoiceComm
         recognitionRef.current.stop();
       }
     };
-  }, [onLetterRecognized]);
+  }, [onLetterRecognized, onBubbleCommand]);
 
   useEffect(() => {
     if (!isSupported || !recognitionRef.current) return;
