@@ -66,7 +66,7 @@ export function DropZone({ hasLetterInZone, onPop, settings }: DropZoneProps) {
                 className="text-xs text-white opacity-80"
                 aria-live="polite"
             >
-                Tip: Say <span className="font-semibold">"bubble"</span> to pop
+                Say <span className="font-semibold">"bubble"</span> or <span className="font-semibold">"pop"</span> to pop
                 the letter!
             </div>
 
